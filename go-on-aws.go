@@ -43,7 +43,7 @@ func NewGoOnAwsStack(scope constructs.Construct, id string, props *GoOnAwsStackP
 		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
 			AllowHeaders: jsii.Strings("Content-Type", "Authorization"),
 			AllowOrigins: jsii.Strings("*"),
-			AllowMethods: jsii.Strings("GET", "POST"),
+			AllowMethods: jsii.Strings("GET", "POST", "OPTIONS"),
 		},
 		DeployOptions: &awsapigateway.StageOptions{
 			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
@@ -52,8 +52,13 @@ func NewGoOnAwsStack(scope constructs.Construct, id string, props *GoOnAwsStackP
 
 	integration := awsapigateway.NewLambdaIntegration(myFunction, nil)
 
+	// create account resource
 	registerResource := api.Root().AddResource(jsii.String("users"), nil)
 	registerResource.AddMethod(jsii.String("POST"), integration, nil)
+
+	// login resource
+	loginResource := api.Root().AddResource(jsii.String("login"), nil)
+	loginResource.AddMethod(jsii.String("POST"), integration, nil)
 
 	return stack
 }

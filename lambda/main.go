@@ -1,18 +1,31 @@
 package main
 
 import (
+	"fmt"
 	"lambdafunc/api/app"
+	"net/http"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type MyEvent struct {
-	Username string `json:"username"`
-}
-
 func main() {
 	myApp := app.NewApp()
-	handler := myApp.ApiHandler
 
-	lambda.Start(handler.RegisterUserHandler)
+	lambda.Start(func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+		fmt.Println(request.Body)
+
+		switch request.Path {
+		case "/users":
+			return myApp.ApiHandler.RegisterUserHandler(request)
+		case "/login":
+			return myApp.ApiHandler.LoginUserHandler(request)
+		default:
+			return events.APIGatewayProxyResponse{
+				Body:       "Not found",
+				StatusCode: http.StatusNotFound,
+			}, nil
+
+		}
+	})
 }
